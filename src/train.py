@@ -21,7 +21,7 @@ def main():
     dataset = IdeaDetectionDataset(
         data_path="data/processed/hela/train.csv",
         id2label_path="data/processed/hela/id2label.json",
-        n_rows_limit=500,  # Limit to 500 rows for debugging
+        n_rows_limit=50,  # Limit for debugging
     )
 
     model = AutoModelForTokenClassification.from_pretrained(
@@ -53,11 +53,11 @@ def main():
         train_dataset=dataset,
         eval_dataset=dataset,
         data_collator=dataset.collate_fn,
-        compute_metrics=partial(compute_metrics, id2label=dataset.index2tag_mapping),
+        compute_metrics=partial(compute_metrics, label2id=dataset.tag2index_mapping),
     )
 
     # # Start training
-    # trainer.train()
+    trainer.train()
 
 
 if __name__ == "__main__":
