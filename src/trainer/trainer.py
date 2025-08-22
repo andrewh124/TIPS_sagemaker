@@ -13,8 +13,11 @@ class MultiLabelTrainer(Trainer):
         logits = outputs.logits
 
         # Use BCEWithLogitsLoss for multi-label classification
+        attention_mask = (
+            inputs["attention_mask"].unsqueeze(-1).repeat(1, 1, logits.size(-1))
+        )
         loss = F.binary_cross_entropy_with_logits(
-            logits, labels, weight=inputs["attention_mask"], reduction="none"
+            logits, labels.float(), weight=attention_mask, reduction="none"
         )
         loss = loss.sum() / (inputs["attention_mask"].sum() + 0.0000001)
 
