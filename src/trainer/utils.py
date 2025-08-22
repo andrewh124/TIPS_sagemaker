@@ -11,45 +11,50 @@ import numpy as np
 
 def compute_metrics(eval_pred, label2id):
     metrics = {}
-    logits, labels = eval_pred
+    logits, labels = eval_pred.predictions, eval_pred.label_ids
     # Apply sigmoid to get probabilities
     probs = 1 / (1 + np.exp(-logits))
     # Threshold at 0.5 for multilabel binary
     preds = (probs > 0.5).astype(int)
 
+    batch_size, seq_len, n_labels = preds.shape
+    batch_size, seq_len, n_labels = labels.shape
+
+    preds = preds.reshape(batch_size * seq_len, n_labels)
+    labels = labels.reshape(batch_size * seq_len, n_labels)
+
     for label, id in label2id.items():
-        class_names = [f"not_{label}", label]
         class_report = classification_report(
             labels[:, id].tolist(),
             preds[:, id].tolist(),
-            target_names=class_names,
             zero_division=0,
             output_dict=True,
+            labels=[label],
         )
         metrics.update(
             {
-                f"f1_{label}": class_report[label]["f1-score"],
-                f"precision_{label}": class_report[label]["precision"],
-                f"recall_{label}": class_report[label]["recall"],
-                f"kappa_{label}": cohen_kappa_score(labels[:, id], preds[:, id]),
+                f"f1-{label}": class_report[label]["f1-score"],
+                f"precision-{label}": class_report[label]["precision"],
+                f"recall-{label}": class_report[label]["recall"],
+                f"kappa-{label}": cohen_kappa_score(labels[:, id], preds[:, id]),
             }
         )
 
     metrics.update(
         {
             "accuracy": accuracy_score(labels, preds),
-            "f1_micro": f1_score(labels, preds, average="micro", zero_division=0),
-            "f1_macro": f1_score(labels, preds, average="macro", zero_division=0),
-            "precision_micro": precision_score(
+            "f1-micro": f1_score(labels, preds, average="micro", zero_division=0),
+            "f1-macro": f1_score(labels, preds, average="macro", zero_division=0),
+            "precision-micro": precision_score(
                 labels, preds, average="micro", zero_division=0
             ),
-            "precision_macro": precision_score(
+            "precision-macro": precision_score(
                 labels, preds, average="macro", zero_division=0
             ),
-            "recall_micro": recall_score(
+            "recall-micro": recall_score(
                 labels, preds, average="micro", zero_division=0
             ),
-            "recall_macro": recall_score(
+            "recall-macro": recall_score(
                 labels, preds, average="macro", zero_division=0
             ),
         }
