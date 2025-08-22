@@ -1,5 +1,6 @@
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from functools import partial
 
@@ -19,25 +20,25 @@ set_seed(42)
 def main():
     dataset = IdeaDetectionDataset(
         data_path="data/processed/hela/train.csv",
-        id2label_path='data/processed/hela/id2label.json',
-        n_rows_limit=500  # Limit to 500 rows for debugging
+        id2label_path="data/processed/hela/id2label.json",
+        n_rows_limit=500,  # Limit to 500 rows for debugging
     )
 
     model = AutoModelForTokenClassification.from_pretrained(
-        'hf-internal-testing/tiny-bert',
+        "hf-internal-testing/tiny-bert",
         num_labels=26,
-        problem_type='multi_label_classification',
+        problem_type="multi_label_classification",
         label2id=dataset.tag2index_mapping,
-        id2label=dataset.index2tag_mapping
+        id2label=dataset.index2tag_mapping,
     )
-    
+
     # Initialize Trainer
     training_args = TrainingArguments(
         output_dir="output",
-        eval_strategy='epoch',
-        save_strategy='no',
-        logging_strategy='epoch',
-        logging_dir='output/logs',
+        eval_strategy="epoch",
+        save_strategy="no",
+        logging_strategy="epoch",
+        logging_dir="output/logs",
         learning_rate=2e-5,
         weight_decay=0.01,
         fp16=False,

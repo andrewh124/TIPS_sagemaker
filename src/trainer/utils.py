@@ -16,7 +16,7 @@ def compute_metrics(eval_pred, label2id):
     probs = 1 / (1 + np.exp(-logits))
     # Threshold at 0.5 for multilabel binary
     preds = (probs > 0.5).astype(int)
-    
+
     for label, id in label2id.items():
         class_names = [f"not_{label}", label]
         class_report = classification_report(
