@@ -26,7 +26,7 @@ def main():
         # n_rows_limit=50,  # Limit for debugging
     )
     eval_dataset = IdeaDetectionDataset(
-        data_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/train.csv'),
+        data_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/test.csv'),
         id2label_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/id2label.json')
     )
 
