@@ -18,25 +18,31 @@ set_seed(42)
 
 
 def main():
-    dataset = IdeaDetectionDataset(
-        data_path="data/processed/hela/train.csv",
-        id2label_path="data/processed/hela/id2label.json",
-        n_rows_limit=50,  # Limit for debugging
+    train_dataset = IdeaDetectionDataset(
+        # data_path="data/processed/hela/train.csv",
+        # id2label_path="data/processed/hela/id2label.json",
+        data_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/train.csv'),
+        id2label_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/id2label.json'),
+        # n_rows_limit=50,  # Limit for debugging
+    )
+    eval_dataset = IdeaDetectionDataset(
+        data_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/train.csv'),
+        id2label_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/id2label.json')
     )
 
     model = AutoModelForTokenClassification.from_pretrained(
-        "hf-internal-testing/tiny-bert",
+        "microsoft/deberta-v3-base",
         num_labels=26,
         problem_type="multi_label_classification",
-        label2id=dataset.tag2index_mapping,
-        id2label=dataset.index2tag_mapping,
+        label2id=train_dataset.tag2index_mapping,
+        id2label=train_dataset.index2tag_mapping,
     )
 
     # Initialize Trainer
     training_args = TrainingArguments(
         output_dir="output",
         eval_strategy="epoch",
-        save_strategy="no",
+        save_strategy="epoch",
         logging_strategy="epoch",
         logging_dir="output/logs",
         learning_rate=2e-5,
@@ -50,13 +56,13 @@ def main():
     trainer = MultiLabelTrainer(
         model=model,
         args=training_args,
-        train_dataset=dataset,
-        eval_dataset=dataset,
-        data_collator=dataset.collate_fn,
-        compute_metrics=partial(compute_metrics, label2id=dataset.tag2index_mapping),
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
+        data_collator=train_dataset.collate_fn,
+        compute_metrics=partial(compute_metrics, label2id=train_dataset.tag2index_mapping),
     )
 
-    # # Start training
+    # Start training
     trainer.train()
 
 

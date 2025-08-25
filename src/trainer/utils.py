@@ -7,13 +7,14 @@ from sklearn.metrics import (
     classification_report,
 )
 import numpy as np
+import torch
 
 
 def compute_metrics(eval_pred, label2id):
     metrics = {}
     logits, labels = eval_pred.predictions, eval_pred.label_ids
     # Apply sigmoid to get probabilities
-    probs = 1 / (1 + np.exp(-logits))
+    probs = torch.sigmoid(torch.from_numpy(logits)).numpy()
     # Threshold at 0.5 for multilabel binary
     preds = (probs > 0.5).astype(int)
 
@@ -29,7 +30,8 @@ def compute_metrics(eval_pred, label2id):
             preds[:, id].tolist(),
             zero_division=0,
             output_dict=True,
-            labels=[label],
+            labels=[0, 1],
+            target_names=[f"not_{label}", label]
         )
         metrics.update(
             {
@@ -40,24 +42,24 @@ def compute_metrics(eval_pred, label2id):
             }
         )
 
-    metrics.update(
-        {
-            "accuracy": accuracy_score(labels, preds),
-            "f1-micro": f1_score(labels, preds, average="micro", zero_division=0),
-            "f1-macro": f1_score(labels, preds, average="macro", zero_division=0),
-            "precision-micro": precision_score(
-                labels, preds, average="micro", zero_division=0
-            ),
-            "precision-macro": precision_score(
-                labels, preds, average="macro", zero_division=0
-            ),
-            "recall-micro": recall_score(
-                labels, preds, average="micro", zero_division=0
-            ),
-            "recall-macro": recall_score(
-                labels, preds, average="macro", zero_division=0
-            ),
-        }
-    )
+    # metrics.update(
+    #     {
+    #         "accuracy": accuracy_score(labels, preds),
+    #         "f1-micro": f1_score(labels, preds, average="micro", zero_division=0),
+    #         "f1-macro": f1_score(labels, preds, average="macro", zero_division=0),
+    #         "precision-micro": precision_score(
+    #             labels, preds, average="micro", zero_division=0
+    #         ),
+    #         "precision-macro": precision_score(
+    #             labels, preds, average="macro", zero_division=0
+    #         ),
+    #         "recall-micro": recall_score(
+    #             labels, preds, average="micro", zero_division=0
+    #         ),
+    #         "recall-macro": recall_score(
+    #             labels, preds, average="macro", zero_division=0
+    #         ),
+    #     }
+    # )
 
     return metrics

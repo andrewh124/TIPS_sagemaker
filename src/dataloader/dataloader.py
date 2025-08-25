@@ -15,7 +15,7 @@ class IdeaDetectionDataset(Dataset):
         logger.info(f"Using id2label mapping from {id2label_path}")
         if n_rows_limit is not None:
             logger.warning(f"Limiting dataset to {n_rows_limit} rows for debugging")
-        self.tokenizer = AutoTokenizer.from_pretrained("hf-internal-testing/tiny-bert")
+        self.tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-base")
         self.n_rows_limit = n_rows_limit  # for debugging
         self.index2tag_mapping = json.load(open(id2label_path))
         self.tag2index_mapping = {v: int(k) for k, v in self.index2tag_mapping.items()}
