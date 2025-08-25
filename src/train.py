@@ -261,14 +261,13 @@ class MultiLabelTrainer(Trainer):
 
 def final_model_training(args):
     train_data_path = os.path.join(
-        os.environ.get("SM_CHANNEL_DATASET_DIR_PATH"),
-        f"{args.train_dataset_name_stem}",
+        os.environ.get("SM_CHANNEL_DATASET_PATH"), "all.csv"
     )
     test_data_path = os.path.join(
         os.environ.get("SM_CHANNEL_DATASET_PATH"), "all.csv"
     )
     id2label_path = os.path.join(
-        os.environ.get("SM_CHANNEL_DATASET_PATH"), "all.csv"
+        os.environ.get("SM_CHANNEL_DATASET_PATH"), 'id2label.json'
     )
 
     train_data = IdeaDetectionDataset(
@@ -299,7 +298,7 @@ def final_model_training(args):
         per_device_eval_batch_size=args.eval_batch_size,
         lr_scheduler_type=args.lr_scheduler_type,
         warmup_steps=args.warmup_steps,
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
         learning_rate=float(args.learning_rate),
         gradient_accumulation_steps=args.gradient_accumulation_steps,
@@ -341,7 +340,7 @@ def cross_validation_training(args):
         ]
     )
     id2label_path = os.path.join(
-        os.environ.get("SM_CHANNEL_DATASET_PATH"), f"{args.id2label_name_stem}"
+        os.environ.get("SM_CHANNEL_DATASET_PATH"), 'id2label.json'
     )
 
     for fold in range(args.n_folds):

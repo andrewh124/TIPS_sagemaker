@@ -39,8 +39,10 @@ def extract_span_tags_metadata(export_dir: str, output_dir=None) -> pd.DataFrame
     return tag_df  # type: ignore
 
 
-def tags_metadata_to_id2label_mapping(tag_metadata_path: str, output_dir=None) -> dict:
-    tag_df = pd.read_csv(Path(tag_metadata_path) / "tags_metadata.csv")
+def tags_metadata_to_id2label_mapping(export_dir: str, output_dir=None) -> dict:
+    # tag_df = pd.read_csv(Path(tag_metadata_path) / "tags_metadata.csv")
+    tag_df = extract_span_tags_metadata(export_dir, output_dir)
+
     id2label = {i: tag for i, tag in enumerate(tag_df["tag_name"].tolist())}
     logger.info(f"Generated id2label mapping with {len(id2label)} entries.")
 
@@ -169,12 +171,12 @@ def kfold_validation_split_for_idea_detection(
 
 
 def main():
-    tag_df = extract_span_tags_metadata(
-        export_dir="data/raw/project-hela-2025-08-08-171658",
-        output_dir="data/raw",
-    )
+    # tag_df = extract_span_tags_metadata(
+    #     export_dir="data/raw/project-hela-2025-08-08-171658",
+    #     output_dir="data/raw",
+    # )
     id2label = tags_metadata_to_id2label_mapping(
-        "data/raw/",
+        export_dir="data/raw/project-hela-2025-08-08-171658",
         output_dir="data/processed/hela",
     )    
     all_data = process_tsv_export_for_idea_detection(

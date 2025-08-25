@@ -11,3 +11,4 @@ wheels/
 
 data/*
 test_notebook.ipynb
+.env
