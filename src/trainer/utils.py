@@ -55,23 +55,23 @@ def compute_metrics(eval_pred, label2id):
 
     # import sys
     # sys.exit(1)
-    
+
     metrics.update(
         {
             "accuracy": accuracy_score(labels, preds),
-            "f1-micro": f1_score(labels, preds, average="micro", zero_division=0),
-            "f1-macro": f1_score(labels, preds, average="macro", zero_division=0),
+            "f1-micro": f1_score(labels, preds, average="micro", zero_division=0, labels=[1]),
+            "f1-macro": f1_score(labels, preds, average="macro", zero_division=0, labels=[1]),
             "precision-micro": precision_score(
-                labels, preds, average="micro", zero_division=0
+                labels, preds, average="micro", zero_division=0, labels=[1]
             ),
             "precision-macro": precision_score(
-                labels, preds, average="macro", zero_division=0
+                labels, preds, average="macro", zero_division=0, labels=[1]
             ),
             "recall-micro": recall_score(
-                labels, preds, average="micro", zero_division=0
+                labels, preds, average="micro", zero_division=0, labels=[1]
             ),
             "recall-macro": recall_score(
-                labels, preds, average="macro", zero_division=0
+                labels, preds, average="macro", zero_division=0, labels=[1]
             ),
         }
     )
