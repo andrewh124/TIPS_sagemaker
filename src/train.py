@@ -54,6 +54,8 @@ class IdeaDetectionDataset(Dataset):
             self.all_response_tags,
         ) = self.load_dataset_from_path(data_path)
 
+        logger.info(f"Loaded dataset with {len(self.all_response_doc_id)} samples")
+
     def load_dataset_from_path(self, path: str) -> tuple[list]:
         df = pd.read_csv(path)
         (
@@ -303,7 +305,7 @@ def final_model_training(args):
         learning_rate=float(args.learning_rate),
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         weight_decay=args.weight_decay,
-        metric_for_best_model="eval_macro_f1",
+        metric_for_best_model="eval_f1_macro",
         greater_is_better=True,
         fp16=True,
         save_total_limit=1,
@@ -378,12 +380,12 @@ def cross_validation_training(args):
             per_device_eval_batch_size=args.eval_batch_size,
             lr_scheduler_type=args.lr_scheduler_type,
             warmup_steps=args.warmup_steps,
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             save_strategy="epoch",
             learning_rate=float(args.learning_rate),
             gradient_accumulation_steps=args.gradient_accumulation_steps,
             weight_decay=args.weight_decay,
-            metric_for_best_model="eval_macro_f1",
+            metric_for_best_model="eval_f1_macro",
             greater_is_better=True,
             fp16=True,
             save_total_limit=1,
@@ -406,6 +408,8 @@ def cross_validation_training(args):
         trainer.train()
         eval_metrics = trainer.evaluate()
         metrics_list.append(eval_metrics)
+
+        wandb.finish()
 
     avg_metrics = {
         k: float(np.mean([m[k] for m in metrics_list]))

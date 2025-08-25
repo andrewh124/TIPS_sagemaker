@@ -154,16 +154,20 @@ def kfold_validation_split_for_idea_detection(
 ) -> dict:
     # This is different from ki data because each row is a token of a response, not a full response, we can't split by row
     logger.info(f"Performing K-Fold validation with {n_splits} splits")
-    dialogue_ids = df["sample_id"].unique().tolist()
+    dialogue_ids = df["sample_id"].unique()
     logger.info(f"Found {len(dialogue_ids)} unique dialogue IDs.")
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
     splits = {}
 
     for i_fold, (train_index, test_index) in enumerate(kf.split(dialogue_ids)):
-        train_df = df[df["sample_id"].isin(train_index)].reset_index(drop=True)
-        test_df = df[df["sample_id"].isin(test_index)].reset_index(drop=True)
+        train_ids = dialogue_ids[train_index]
+        test_ids = dialogue_ids[test_index]
+        train_df = df[df["sample_id"].isin(train_ids)].reset_index(drop=True)
+        test_df = df[df["sample_id"].isin(test_ids)].reset_index(drop=True)
         splits[f"train_{i_fold}"] = train_df
         splits[f"test_{i_fold}"] = test_df
+
+        logger.info(f'Fold {i_fold}: {len(train_df)=} -- {len(test_df)=}')
 
     logger.info(f"Created {n_splits} train-test splits")
 
