@@ -21,13 +21,21 @@ def main():
     train_dataset = IdeaDetectionDataset(
         # data_path="data/processed/hela/train.csv",
         # id2label_path="data/processed/hela/id2label.json",
-        data_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/train.csv'),
-        id2label_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/id2label.json'),
+        data_path=os.path.join(
+            os.environ.get("SM_CHANNEL_TRAIN"), "processed/hela/train.csv"
+        ),
+        id2label_path=os.path.join(
+            os.environ.get("SM_CHANNEL_TRAIN"), "processed/hela/id2label.json"
+        ),
         # n_rows_limit=50,  # Limit for debugging
     )
     eval_dataset = IdeaDetectionDataset(
-        data_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/test.csv'),
-        id2label_path=os.path.join(os.environ.get("SM_CHANNEL_TRAIN"), 'processed/hela/id2label.json')
+        data_path=os.path.join(
+            os.environ.get("SM_CHANNEL_TRAIN"), "processed/hela/test.csv"
+        ),
+        id2label_path=os.path.join(
+            os.environ.get("SM_CHANNEL_TRAIN"), "processed/hela/id2label.json"
+        ),
     )
 
     model = AutoModelForTokenClassification.from_pretrained(
@@ -59,7 +67,9 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=train_dataset.collate_fn,
-        compute_metrics=partial(compute_metrics, label2id=train_dataset.tag2index_mapping),
+        compute_metrics=partial(
+            compute_metrics, label2id=train_dataset.tag2index_mapping
+        ),
     )
 
     # Start training

@@ -32,14 +32,14 @@ def compute_metrics(eval_pred, label2id):
             zero_division=0,
             output_dict=True,
             labels=[0, 1],
-            target_names=[f"not_{label}", label]
+            target_names=[f"not_{label}", label],
         )
         metrics.update(
             {
                 f"f1-{label}": class_report[label]["f1-score"],
                 f"precision-{label}": class_report[label]["precision"],
                 f"recall-{label}": class_report[label]["recall"],
-                f"support-{label}": class_report[label]["support"]
+                f"support-{label}": class_report[label]["support"],
             }
         )
 
@@ -59,8 +59,12 @@ def compute_metrics(eval_pred, label2id):
     metrics.update(
         {
             "accuracy": accuracy_score(labels, preds),
-            "f1-micro": f1_score(labels, preds, average="micro", zero_division=0, labels=[1]),
-            "f1-macro": f1_score(labels, preds, average="macro", zero_division=0, labels=[1]),
+            "f1-micro": f1_score(
+                labels, preds, average="micro", zero_division=0, labels=[1]
+            ),
+            "f1-macro": f1_score(
+                labels, preds, average="macro", zero_division=0, labels=[1]
+            ),
             "precision-micro": precision_score(
                 labels, preds, average="micro", zero_division=0, labels=[1]
             ),

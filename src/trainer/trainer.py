@@ -13,11 +13,8 @@ class MultiLabelTrainer(Trainer):
         logits = outputs.logits
 
         # Use BCEWithLogitsLoss for multi-label classification
-        logits = logits[labels!=-100]
-        labels = labels[labels!=-100]
-        loss = F.binary_cross_entropy_with_logits(
-            logits,
-            labels.float()
-        )
+        logits = logits[labels != -100]
+        labels = labels[labels != -100]
+        loss = F.binary_cross_entropy_with_logits(logits, labels.float())
 
         return (loss, outputs) if return_outputs else loss
