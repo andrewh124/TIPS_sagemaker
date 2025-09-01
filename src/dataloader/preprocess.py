@@ -1,10 +1,10 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
-from tqdm.auto import tqdm
 import pandas as pd
 from loguru import logger
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
+from tqdm.auto import tqdm
 
 
 def extract_span_tags_metadata(export_dir: str, output_dir=None) -> pd.DataFrame:
@@ -79,9 +79,13 @@ def _extract_file_paths(export_dir: str, preferred_annotator: str) -> dict:
     return sample_id2path
 
 
-def process_inception_export_samples(
-    sample_id2path: dict, output_dir=None
+def process_tsv_export_for_idea_detection(
+    export_dir: str, preferred_annotator: str, output_dir=None
 ) -> pd.DataFrame:
+    sample_id2path = _extract_file_paths(
+        export_dir=export_dir,
+        preferred_annotator=preferred_annotator,
+    )
     out = []
 
     pbar = tqdm(sample_id2path.items())
@@ -115,7 +119,7 @@ def process_inception_export_samples(
     logger.info(f"Processed {len(out_df)} rows from {len(sample_id2path)} samples.")
 
     if output_dir:
-        output_path = Path(output_dir) / "processed_data.csv"
+        output_path = Path(output_dir) / "all.csv"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         out_df.to_csv(output_path, index=False)
         logger.info(f"Saved processed data to {output_path}")
@@ -143,6 +147,27 @@ def split_by_dialogue(data_path: str, output_dir: str) -> None:
     logger.info(f"Saved split data to {output_dir}.")
 
 
+def kfold_validation_split_for_idea_detection(
+    df: pd.DataFrame, n_splits: int = 10, random_state: int = 42
+) -> dict:
+    # This is different from ki data because each row is a token of a response, not a full response, we can't split by row
+    logger.info(f"Performing K-Fold validation with {n_splits} splits")
+    dialogue_ids = df["sample_id"].unique().tolist()
+    logger.info(f"Found {len(dialogue_ids)} unique dialogue IDs.")
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    splits = {}
+
+    for i_fold, (train_index, test_index) in enumerate(kf.split(dialogue_ids)):
+        train_df = df[df["sample_id"].isin(train_index)].reset_index(drop=True)
+        test_df = df[df["sample_id"].isin(test_index)].reset_index(drop=True)
+        splits[f"train_{i_fold}"] = train_df
+        splits[f"test_{i_fold}"] = test_df
+
+    logger.info(f"Created {n_splits} train-test splits")
+
+    return splits
+
+
 def main():
     tag_df = extract_span_tags_metadata(
         export_dir="data/raw/project-hela-2025-08-08-171658",
@@ -151,16 +176,13 @@ def main():
     id2label = tags_metadata_to_id2label_mapping(
         "data/raw/",
         output_dir="data/processed/hela",
-    )
-
-    sample_id2path = _extract_file_paths(
+    )    
+    all_data = process_tsv_export_for_idea_detection(
         export_dir="data/raw/project-hela-2025-08-08-171658",
         preferred_annotator="kellybillings",
-    )
-    all_data = process_inception_export_samples(
-        sample_id2path,
         output_dir="data/raw",
     )
+
     split_by_dialogue(
         data_path="data/raw/processed_data.csv",
         output_dir="data/processed/hela",

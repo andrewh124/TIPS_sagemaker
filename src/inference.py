@@ -1,8 +1,9 @@
-from transformers import AutoTokenizer, AutoModelForTokenClassification
-import torch
-from pathlib import Path
-import numpy as np
 import json
+from pathlib import Path
+
+import numpy as np
+import torch
+from transformers import AutoModelForTokenClassification, AutoTokenizer
 
 
 class IdeaDetectionPipeline:
