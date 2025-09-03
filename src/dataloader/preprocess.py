@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 from loguru import logger
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold, train_test_split
 from tqdm.auto import tqdm
 
 
@@ -167,7 +167,7 @@ def kfold_validation_split_for_idea_detection(
         splits[f"train_{i_fold}"] = train_df
         splits[f"test_{i_fold}"] = test_df
 
-        logger.info(f'Fold {i_fold}: {len(train_df)=} -- {len(test_df)=}')
+        logger.info(f"Fold {i_fold}: {len(train_df)=} -- {len(test_df)=}")
 
     logger.info(f"Created {n_splits} train-test splits")
 
@@ -182,7 +182,7 @@ def main():
     id2label = tags_metadata_to_id2label_mapping(
         export_dir="data/raw/project-hela-2025-08-08-171658",
         output_dir="data/processed/hela",
-    )    
+    )
     all_data = process_tsv_export_for_idea_detection(
         export_dir="data/raw/project-hela-2025-08-08-171658",
         preferred_annotator="kellybillings",
